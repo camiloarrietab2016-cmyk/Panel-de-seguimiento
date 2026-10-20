@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SDSN Cormagdalena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;1,400&display=swap">
+  <style>
+/* ── TOKENS ── */
+:root {
+  --bg:        #FFFFFF;
+  --surface:   #FFFFFF;
+  --surface-2: #EEF4FB;
+  --border:    #C3D8EE;
+  --text-1:    #0A1E33;
+  --text-2:    #3A577C;
+  --text-3:    #7298B8;
+  --accent:    #1560BD;
+  --accent-lo: #DCE9F8;
+  --sand:      #C07800;
+  --sand-lo:   #FFF3CC;
+  --ok:        #1B7A44;
+  --ok-lo:     #CCF0DC;
+  --warn:      #B07000;
+  --warn-lo:   #FFF3CC;
+  --alert:     #B52020;
+  --alert-lo:  #FAD5D3;
+  --radius:    10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #050F1C; --surface:   #091826; --surface-2: #0D2338;
+    --border:    #163452; --text-1:    #DCF0F8; --text-2:    #7AADD8;
+    --text-3:    #3F6A90; --accent:    #4DA3EE; --accent-lo: #072038;
+    --sand:      #D4A020; --sand-lo:   #2A1C04;
+    --ok:        #2DB870; --ok-lo:     #082216;
+    --warn:      #D4A020; --warn-lo:   #2A1C04;
+    --alert:     #D94040; --alert-lo:  #280C0C;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #050F1C; --surface:   #091826; --surface-2: #0D2338;
+  --border:    #163452; --text-1:    #DCF0F8; --text-2:    #7AADD8;
+  --text-3:    #3F6A90; --accent:    #4DA3EE; --accent-lo: #072038;
+  --sand:      #D4A020; --sand-lo:   #2A1C04;
+  --ok:        #2DB870; --ok-lo:     #082216;
+  --warn:      #D4A020; --warn-lo:   #2A1C04;
+  --alert:     #D94040; --alert-lo:  #280C0C;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--surface-2); }
+[hidden] { display:none !important; }
+body { font-family:'Source Sans 3',system-ui,sans-serif; font-size:15px; line-height:1.55; color:var(--text-1); background:var(--bg); margin:0 auto; max-width:980px; padding:0 20px 24px; box-shadow:0 0 0 1px var(--border); min-height:100vh; }
+
+/* ── HEADER ── */
+.header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-block:16px 14px; border-bottom:2px solid var(--accent); margin-bottom:16px; }
+.hdr-brand { display:flex; align-items:center; gap:12px; }
+.hdr-logo { width:42px; height:42px; border-radius:9px; background:var(--accent); display:grid; place-items:center; flex-shrink:0; box-shadow:0 2px 8px rgba(21,96,189,0.25); }
+.hdr-logo svg { width:23px; height:23px; fill:none; stroke:#fff; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.hdr-name { font-family:'Cabin Condensed',sans-serif; font-size:21px; font-weight:700; color:var(--accent); line-height:1.1; }
+.hdr-sub  { font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.07em; margin-top:1px; }
+.hdr-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.hdr-date { font-family:'Cabin Condensed',sans-serif; font-size:15px; font-weight:700; color:var(--text-2); text-align:right; }
+.edit-fab { display:flex; align-items:center; gap:5px; padding:6px 13px; border:1.5px solid var(--accent); border-radius:7px; background:var(--surface); color:var(--accent); font-family:'Source Sans 3',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.13s; white-space:nowrap; }
+.hdr-sync { font-size:11px; color:var(--text-3); text-align:right; max-width:260px; line-height:1.35; }
+.hdr-sync.ok { color:var(--ok); }
+.hdr-sync.err { color:var(--alert); }
+.edit-err { color:var(--alert); font-weight:600; }
+.btn-reset.confirm { border-color:var(--alert); color:var(--alert); }
+.btn-save:disabled { opacity:0.6; cursor:wait; }
+.edit-fab:hover { background:var(--accent); color:#fff; }
+.edit-fab svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ── TABS ── */
+.tabs { display:flex; gap:3px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:3px; margin-bottom:14px; overflow-x:auto; scrollbar-width:thin; }
+.tab-btn { flex:1; min-width:90px; padding:8px 10px; border:none; border-radius:7px; cursor:pointer; font-family:'Source Sans 3',sans-serif; font-size:12px; font-weight:600; background:transparent; color:var(--text-3); transition:all 0.13s; text-align:center; white-space:nowrap; line-height:1.3; }
+.tab-short { display:block; }
+.tab-count { display:block; font-size:10px; font-weight:400; color:var(--text-3); margin-top:1px; }
+.tab-btn.active { background:var(--accent); color:#fff; box-shadow:0 2px 6px rgba(21,96,189,0.3); }
+.tab-btn.active .tab-count { color:rgba(255,255,255,0.7); }
+
+/* ── CHAPTER PANEL ── */
+.chapter-panel { display:none; }
+.chapter-panel.active { display:block; }
+.ch-title-row { display:flex; align-items:baseline; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.ch-title { font-family:'Cabin Condensed',sans-serif; font-size:17px; font-weight:700; color:var(--text-1); line-height:1.25; }
+.ch-corte-badge { font-size:11px; color:var(--text-3); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; white-space:nowrap; }
+
+/* ── SUMMARY TILES ── */
+.sum-row { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:14px; }
+@media (max-width:620px) { .sum-row { grid-template-columns:1fr 1fr; } }
+.sum-tile { background:var(--surface); border:1px solid var(--border); border-top:3px solid var(--border); border-radius:var(--radius); padding:11px 14px; }
+.sum-tile.st-accent { border-top-color:var(--accent); }
+.sum-tile.st-amber  { border-top-color:var(--sand); }
+.sum-label { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); margin-bottom:3px; }
+.sum-val { font-family:'Cabin Condensed',sans-serif; font-size:21px; font-weight:700; color:var(--text-1); font-variant-numeric:tabular-nums; line-height:1.1; }
+.sum-val.ca { color:var(--accent); }
+.sum-val.cs { color:var(--sand); }
+.sum-sub { font-size:11px; color:var(--text-3); margin-top:2px; }
+
+/* ── PROJECT LIST ── */
+.plist { display:flex; flex-direction:column; gap:8px; }
+
+/* ── PROJECT CARD — ACCORDION ── */
+.pcard { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.pcard.sok   { border-left-color:var(--ok); }
+.pcard.swarn { border-left-color:var(--warn); }
+.pcard.salt  { border-left-color:var(--alert); }
+
+/* Clickable header row */
+.pcard-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; user-select:none; transition:background 0.12s; }
+.pcard-hdr:hover { background:var(--surface-2); }
+.pcard.open .pcard-hdr { background:var(--surface-2); }
+
+.psem { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.psem.ok   { background:var(--ok); }
+.psem.warn { background:var(--warn); }
+.psem.alt  { background:var(--alert); }
+
+.pinfo { flex:1; min-width:0; }
+.pname { font-size:13.5px; font-weight:600; color:var(--text-1); line-height:1.3; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.terminado-badge { display:inline-block; font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:4px; background:var(--ok-lo); color:var(--ok); flex-shrink:0; }
+.pnota { font-size:11px; color:var(--text-3); margin-top:2px; line-height:1.4; }
+.pnota.alert-nota { color:var(--alert); font-weight:600; }
+
+/* Mini KPI bars shown in collapsed header */
+.pcard-kpis { display:flex; flex-direction:column; gap:5px; min-width:160px; flex-shrink:0; }
+@media (max-width:560px) { .pcard-kpis { display:none; } }
+.pkpi { display:grid; grid-template-columns:42px 1fr 50px; align-items:center; gap:6px; }
+.pkpi-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-3); text-align:right; }
+.pkpi-bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.pkpi-fill { height:100%; border-radius:3px; }
+.pf-fin { background:var(--accent); }
+.pf-fis { background:var(--sand); }
+.pkpi-pct { font-family:'Cabin Condensed',sans-serif; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; }
+.pkpi-pct.fin-c { color:var(--accent); }
+.pkpi-pct.fis-c { color:var(--sand); }
+
+/* Aside: total value + paid */
+.paside { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0; text-align:right; }
+.aside-bgt { font-family:'Cabin Condensed',sans-serif; font-size:15px; font-weight:700; color:var(--text-1); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.aside-pagado { font-size:11px; color:var(--text-3); white-space:nowrap; }
+.aside-vence  { font-size:11px; color:var(--text-3); white-space:nowrap; }
+.aside-days   { font-size:11px; font-weight:600; white-space:nowrap; }
+.dc-ok    { color:var(--text-3); }
+.dc-warn  { color:var(--warn); }
+.dc-alert { color:var(--alert); }
+
+/* Expand chevron */
+.pcard-chev { flex-shrink:0; display:flex; align-items:center; margin-left:4px; }
+.pcard-chev svg { width:18px; height:18px; stroke:var(--text-3); fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; transition:transform 0.2s ease; }
+.pcard.open .pcard-chev svg { transform:rotate(180deg); stroke:var(--accent); }
+
+/* Collapsible body */
+.pcard-body { display:none; border-top:1px solid var(--border); background:var(--surface); }
+.pcard.open .pcard-body { display:block; }
+
+/* ── CONTRACTS ── */
+.contracts-list { }
+.contract-row { padding:12px 16px; border-bottom:1px solid var(--border); }
+.contract-row:last-child { border-bottom:none; }
+.ctr-meta { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:3px; }
+.ctr-num { font-family:'Cabin Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--text-2); letter-spacing:0.02em; }
+.tipo-badge { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:1.5px 6px; border-radius:4px; flex-shrink:0; }
+.tipo-obra          { background:var(--accent-lo); color:var(--accent); }
+.tipo-interventoria { background:var(--sand-lo);   color:var(--sand); }
+.tipo-convenio      { background:var(--ok-lo);     color:var(--ok); }
+.tipo-oc            { background:var(--surface-2); color:var(--text-2); }
+.tipo-cps           { background:#ECE8F8; color:#4527A0; }
+.tipo-lab           { background:#E3F0FD; color:#1560BD; }
+.tipo-veh           { background:#FFF3E0; color:#C05000; }
+.tipo-viat          { background:#EDF5E6; color:#2E7A1A; }
+.tipo-contrap       { background:var(--surface-2); color:var(--text-3); font-style:italic; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  .tipo-cps { background:#2D1B69; color:#B39DDB; }
+  .tipo-lab { background:#0D2D4A; color:#64B5F6; }
+  .tipo-veh { background:#3E1F00; color:#FFB74D; }
+  .tipo-viat{ background:#1B2A0A; color:#AED581; }
+}}
+:root[data-theme="dark"] .tipo-cps { background:#2D1B69; color:#B39DDB; }
+:root[data-theme="dark"] .tipo-lab { background:#0D2D4A; color:#64B5F6; }
+:root[data-theme="dark"] .tipo-veh { background:#3E1F00; color:#FFB74D; }
+:root[data-theme="dark"] .tipo-viat{ background:#1B2A0A; color:#AED581; }
+/* Informative rows: contrapartida / saldo sin comprometer */
+.ctr-contrap { background:var(--surface-2); border:1px dashed var(--border); border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.ctr-contrap-obj { font-size:12px; color:var(--text-2); flex:1; min-width:180px; }
+.ctr-contrap-val { font-size:12px; font-weight:600; color:var(--text-2); white-space:nowrap; }
+.ctr-contrap.pendiente { background:var(--warn-lo); border-color:var(--warn); }
+.ctr-contrap.pendiente .ctr-contrap-obj { color:var(--warn); }
+.ctr-contrap.pendiente .ctr-contrap-val { color:var(--warn); }
+.ctr-inicio { font-size:10.5px; color:var(--text-3); }
+.ctr-valor-inline { margin-left:auto; font-family:'Cabin Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--text-2); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.ctr-objeto { font-size:12px; color:var(--text-3); margin-bottom:8px; line-height:1.4; }
+.cbars { display:flex; flex-direction:column; gap:5px; }
+.cbar-row { display:grid; grid-template-columns:72px 1fr 44px 110px; align-items:center; gap:7px; }
+@media (max-width:520px) { .cbar-row { grid-template-columns:72px 1fr 44px; } .cpagado { display:none; } }
+.cbar-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-3); text-align:right; }
+.btrack { height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; border:1px solid var(--border); }
+.bfill  { height:100%; border-radius:3px; }
+.bf-fin { background:var(--accent); }
+.bf-fis { background:var(--sand); }
+.bpct { font-family:'Cabin Condensed',sans-serif; font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; color:var(--text-2); }
+.cpagado { font-size:11px; color:var(--text-3); font-variant-numeric:tabular-nums; text-align:right; }
+.acum-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); margin-bottom:5px; padding-bottom:4px; border-bottom:1px dashed var(--border); }
+.vblock { margin-top:10px; padding-top:9px; border-top:1px dashed var(--border); }
+.vblock-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.vblock-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent); }
+.vblock-valor { font-size:10.5px; color:var(--text-3); font-variant-numeric:tabular-nums; }
+
+/* ── LEGEND ── */
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:4px; margin-top:14px; padding:10px 0; border-top:1px solid var(--border); }
+.leg { display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-3); }
+.leg-bar { width:18px; height:7px; border-radius:3px; flex-shrink:0; }
+.leg-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ── FOOTER ── */
+.footer { margin-top:6px; padding-block:8px 4px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px; font-size:11px; color:var(--text-3); }
+
+/* ═══════════════════════════════
+   EDITOR MODAL
+═══════════════════════════════ */
+.edit-overlay { display:none; position:fixed; inset:0; background:rgba(5,15,28,0.6); z-index:200; align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto; }
+.edit-overlay.open { display:flex; }
+.edit-modal { background:var(--surface); border:1px solid var(--border); border-radius:12px; width:100%; max-width:700px; max-height:calc(100dvh - 32px); display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(21,96,189,0.2); }
+.edit-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px 12px; border-bottom:1px solid var(--border); background:var(--surface-2); border-radius:12px 12px 0 0; }
+.edit-title { font-family:'Cabin Condensed',sans-serif; font-size:17px; font-weight:700; color:var(--text-1); }
+.edit-close-btn { width:28px; height:28px; border-radius:6px; border:none; background:var(--border); cursor:pointer; color:var(--text-2); font-size:16px; display:grid; place-items:center; line-height:1; }
+.edit-close-btn:hover { background:var(--accent); color:#fff; }
+.edit-body { padding:16px 18px; flex:1; overflow-y:auto; }
+
+/* Corte date row */
+.corte-row { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.corte-label { font-size:13px; font-weight:600; color:var(--text-2); }
+.corte-input { padding:5px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text-1); font-family:'Source Sans 3',sans-serif; font-size:13px; }
+
+/* Chapter tabs inside modal */
+.edit-tabs { display:flex; gap:3px; margin-bottom:16px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:3px; overflow-x:auto; }
+.edit-tab { flex:1; min-width:70px; padding:6px 8px; border:none; border-radius:5px; cursor:pointer; font-family:'Source Sans 3',sans-serif; font-size:11.5px; font-weight:600; background:transparent; color:var(--text-3); white-space:nowrap; }
+.edit-tab.active { background:var(--accent); color:#fff; }
+.edit-chapter { display:none; }
+.edit-chapter.active { display:block; }
+
+/* Project form block */
+.edit-project { margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--border); }
+.edit-project:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.edit-project-name { font-size:12.5px; font-weight:600; color:var(--text-1); margin-bottom:9px; }
+.edit-meta-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
+.meta-label { font-size:11px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; }
+.status-pick { display:flex; gap:4px; }
+.sp-btn { padding:3px 10px; border-radius:5px; border:1px solid var(--border); cursor:pointer; font-size:11px; font-weight:700; background:var(--surface-2); color:var(--text-3); transition:all 0.12s; }
+.sp-btn.sp-ok.sel   { background:var(--ok-lo);    color:var(--ok);    border-color:var(--ok); }
+.sp-btn.sp-warn.sel { background:var(--warn-lo);  color:var(--warn);  border-color:var(--warn); }
+.sp-btn.sp-alt.sel  { background:var(--alert-lo); color:var(--alert); border-color:var(--alert); }
+.term-label { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-3); cursor:pointer; }
+.nota-input { width:100%; padding:6px 9px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text-1); font-family:'Source Sans 3',sans-serif; font-size:12px; resize:none; margin-bottom:9px; line-height:1.45; }
+.nota-input:focus { outline:2px solid var(--accent-lo); border-color:var(--accent); }
+
+/* Contract edit block */
+.edit-ctr { background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
+.edit-ctr:last-child { margin-bottom:0; }
+.edit-ctr-head { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
+.edit-ctr-num { font-family:'Cabin Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--text-2); }
+.pct-block { margin-bottom:6px; }
+.pct-block-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); margin-bottom:6px; }
+.pct-block-label.lv26 { color:var(--accent); }
+.pct-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.pct-row-label { font-size:11px; font-weight:600; color:var(--text-3); min-width:90px; }
+.pct-input-wrap { display:flex; align-items:center; gap:4px; }
+.pct-input { width:76px; padding:5px 8px; border:1px solid var(--border); border-radius:5px; background:var(--surface); color:var(--text-1); font-family:'Cabin Condensed',sans-serif; font-size:14px; font-weight:700; text-align:right; }
+.pct-input:focus { outline:2px solid var(--accent-lo); border-color:var(--accent); }
+.pct-sym { font-size:12px; color:var(--text-3); }
+.pct-divider { width:1px; height:20px; background:var(--border); margin:0 4px; }
+
+/* Billing info display on contract card */
+.c-billing { margin-top:8px; padding:8px 10px; background:var(--surface-2); border-radius:6px; border:1px solid var(--border); display:flex; flex-direction:column; gap:5px; }
+.cbill-row { display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
+.cbill-q { font-size:10.5px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:0.05em; white-space:nowrap; }
+.cbill-v { font-size:12px; color:var(--text-1); }
+.cbill-rad { font-family:'Cabin Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--accent); }
+.cbill-paid { color:var(--ok); font-weight:600; }
+
+/* Billing editor section inside contract form */
+.bill-block { margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:8px; }
+.bill-block-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); margin-bottom:2px; }
+.bill-q-label { font-size:11px; font-weight:600; color:var(--text-2); margin-bottom:4px; display:block; }
+.bill-daterange { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.bill-date { padding:5px 8px; border:1px solid var(--border); border-radius:5px; background:var(--surface); color:var(--text-1); font-family:'Source Sans 3',sans-serif; font-size:12px; }
+.bill-date:focus { outline:2px solid var(--accent-lo); border-color:var(--accent); }
+.bill-sep { font-size:11px; color:var(--text-3); }
+.bill-input { width:100%; padding:5px 9px; border:1px solid var(--border); border-radius:5px; background:var(--surface); color:var(--text-1); font-family:'Source Sans 3',sans-serif; font-size:12.5px; }
+.bill-input:focus { outline:2px solid var(--accent-lo); border-color:var(--accent); }
+
+/* Footer */
+.edit-footer { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 18px 14px; border-top:1px solid var(--border); border-radius:0 0 12px 12px; background:var(--surface-2); }
+.edit-footer-left { font-size:11.5px; color:var(--text-3); }
+.edit-footer-right { display:flex; gap:9px; }
+.btn-reset  { padding:8px 14px; border:1px solid var(--border); border-radius:7px; cursor:pointer; background:transparent; color:var(--text-3); font-family:'Source Sans 3',sans-serif; font-size:12.5px; font-weight:600; }
+.btn-cancel { padding:8px 14px; border:1px solid var(--border); border-radius:7px; cursor:pointer; background:transparent; color:var(--text-2); font-family:'Source Sans 3',sans-serif; font-size:12.5px; font-weight:600; }
+.btn-save   { padding:8px 20px; border:none; border-radius:7px; cursor:pointer; background:var(--accent); color:#fff; font-family:'Source Sans 3',sans-serif; font-size:13px; font-weight:700; }
+.btn-save:hover { opacity:0.88; }
+</style>
+</head>
+<body>
+<!-- HEADER -->
+<header class="header">
+  <div class="hdr-brand">
+    <div class="hdr-logo">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 10 Q6.5 6.5 10 10 Q13.5 13.5 17 10 Q19 8 21 10"/>
+        <path d="M3 15 Q6.5 11.5 10 15 Q13.5 18.5 17 15 Q19 13 21 15" stroke-opacity="0.4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="hdr-name">SDSN · Cormagdalena</div>
+      <div class="hdr-sub">Panel de seguimiento — Avance físico y financiero de contratos</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-date" id="hdr-date"></div>
+    <div class="hdr-sync" id="hdr-sync"></div>
+    <button class="edit-fab" id="edit-btn">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Actualizar datos
+    </button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs" role="tablist" id="tabs"></div>
+<!-- PANELS -->
+<div id="panels"></div>
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg"><div class="leg-bar" style="background:var(--accent)"></div>Avance financiero</div>
+  <div class="leg"><div class="leg-bar" style="background:var(--sand)"></div>Avance físico</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--ok)"></div>Seguimiento normal</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--warn)"></div>Requiere atención</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--alert)"></div>Alerta / acción urgente</div>
+</div>
+<footer class="footer">
+  <span>SDSN · Subdirección de Desarrollo Sostenible y Navegación · Cormagdalena</span>
+  <span id="footer-ts"></span>
+</footer>
+
+<!-- EDITOR OVERLAY (built by JS) -->
+<div id="edit-root"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   DATOS BASE (Comité Directivo No. 12)
+   Aquí se definen los datos estructurales
+   que no cambian (nombres, valores en M COP,
+   fechas fijas, etc.). Los avances y estado
+   se gestionan a través del formulario.
+════════════════════════════════════════════ */
+const CHAPTERS_BASE = [
+  {
+    short: 'Navegación',
+    title: 'Recuperación de la Navegación',
+    summaryUseV26: true,   /* resumen del capítulo usa cifras de vigencia 2026 */
+    projects: [
+      {
+        name: 'Canal de Acceso al Puerto de Barranquilla',
+        vence: '2026-12-31',
+        contracts: [
+          { num:'0-525-2024', tipo:'obra',
+            objeto:'Mantenimiento canal navegable — dragado hidráulico (Bocas de Ceniza – Barranquilla)',
+            valor:241685, inicio:'2024-11-06', hasV26:true, valorV26:101370.3 },
+          { num:'0-526-2024', tipo:'interventoria',
+            objeto:'Interventoría integral al dragado del canal de acceso al Puerto de Barranquilla',
+            valor:4209, inicio:'2024-11-06', hasV26:true, valorV26:2180.5 }
+        ]
+      },
+      {
+        name: 'Canal Navegable Barrancabermeja – Barranquilla',
+        vence: null,
+        contracts: [
+          { num:'0-458-2023', tipo:'obra',
+            objeto:'Conservación y mantenimiento del canal navegable Barrancabermeja – Barranquilla',
+            valor:148050, hasV26:true, valorV26:52429.3 },
+          { num:'0-457-2023', tipo:'interventoria',
+            objeto:'Interventoría técnica, administrativa y financiera al contrato de conservación canal navegable',
+            valor:5941, hasV26:true, valorV26:2067.5 }
+        ]
+      },
+      {
+        name: 'Suministro de Combustibles — Operaciones Fluviales',
+        vence: null,
+        contracts: [
+          { num:'OC-159822', tipo:'oc',
+            objeto:'Orden de compra — suministro de combustibles para embarcaciones y equipos SDSN',
+            valor:900 }
+        ]
+      }
+    ]
+  },
+  {
+    short: 'Medio Ambiente',
+    title: 'Recuperación del Medio Ambiente y los RNR',
+    projects: [
+      {
+        name: 'Recuperación de Cuerpos de Agua — Barrancabermeja',
+        vence: null,
+        contracts: [
+          { num:'0-076-2-2026', tipo:'obra',
+            objeto:'Recuperación ambiental de cuerpos de agua urbanos en Barrancabermeja',
+            valor:15899, inicio:'2026-08-05' },
+          { num:'0-053-2-2026', tipo:'interventoria',
+            objeto:'Interventoría a obras de recuperación ambiental — cuerpos de agua en Barrancabermeja',
+            valor:1103, inicio:'2026-08-05' }
+        ]
+      },
+      {
+        name: 'Recuperación Caño Guataca — San Fernando, Bolívar',
+        vence: null,
+        contracts: [
+          { num:'0-287-2026', tipo:'obra',
+            objeto:'Recuperación y restauración del Caño Guataca, San Fernando, Bolívar',
+            valor:4602, inicio:'2026-07-28' },
+          { num:'0-289-2026', tipo:'interventoria',
+            objeto:'Interventoría técnica a obras de recuperación Caño Guataca, San Fernando',
+            valor:324, inicio:'2026-07-28' }
+        ]
+      },
+      {
+        name: 'Convenio Interadministrativo — San Sebastián del Cauca',
+        vence: null,
+        contracts: [
+          { num:'1-001-2026', tipo:'convenio',
+            objeto:'Convenio interadministrativo — protección de ecosistemas, San Sebastián del Cauca',
+            valor:200, inicio:'2026-08-19' }
+        ]
+      },
+      {
+        name: 'Recuperación Cuerpos de Agua — Municipios Ribereños',
+        vence: null,
+        contracts: [
+          { num:'0-234-2-2026', tipo:'obra',
+            objeto:'Recuperación ambiental de cuerpos de agua en municipios ribereños del Magdalena',
+            valor:4475, inicio:'2026-09-10' },
+          { num:'0-235-2-2026', tipo:'interventoria',
+            objeto:'Interventoría a obras de recuperación ambiental en municipios ribereños',
+            valor:319, inicio:'2026-09-10' }
+        ]
+      }
+    ]
+  },
+  {
+    short: 'Tierras',
+    title: 'Adecuación y Conservación de Tierras',
+    projects: [
+      {
+        name: 'Servicios con Disposición de Equipos — Adecuación de Tierras',
+        vence: '2026-12-31',
+        contracts: [
+          { num:'0-279-2026', tipo:'obra',
+            objeto:'Prestación de servicios con disposición de equipos para adecuación de tierras en predios Cormagdalena',
+            valor:29039 },
+          { num:'0-280-2026', tipo:'interventoria',
+            objeto:'Interventoría técnica, administrativa y financiera a la adecuación de tierras',
+            valor:1427 }
+        ]
+      }
+    ]
+  },
+  {
+    short: 'SGR',
+    title: 'Sistema General de Regalías',
+    projects: [
+      {
+        name: 'Caño Caracol — El Agrado, Huila',
+        vence: null,
+        contracts: [
+          { num:'0-454-2024', tipo:'obra',   objeto:'Obras de recuperación y adecuación hidráulica del Caño Caracol, El Agrado, Huila', valor:3767 },
+          { num:'0-477-2024', tipo:'interventoria', objeto:'Interventoría técnica a obras de recuperación Caño Caracol, El Agrado', valor:292 }
+        ]
+      },
+      {
+        name: 'Muro de Protección — Santa Lucía, Canal del Dique',
+        vence: null,
+        contracts: [
+          { num:'0-553-2024', tipo:'obra',   objeto:'Construcción de muro de protección en Santa Lucía, Atlántico — Canal del Dique', valor:18097 },
+          { num:'0-572-2024', tipo:'interventoria', objeto:'Interventoría al muro de protección Santa Lucía — Canal del Dique', valor:874 }
+        ]
+      },
+      {
+        name: 'Restauración de Humedales — CORPOCESAR',
+        vence: null,
+        contracts: [
+          { num:'0-040-2-2025', tipo:'obra',   objeto:'Restauración de humedales y ecosistemas en jurisdicción de CORPOCESAR', valor:17068 },
+          { num:'0-123-2-2025', tipo:'interventoria', objeto:'Interventoría a obras de restauración de humedales CORPOCESAR', valor:1233 }
+        ]
+      },
+      {
+        name: 'Ciénaga de Zambrano — Bolívar',
+        vence: null,
+        contracts: [
+          { num:'0-210-2-2025', tipo:'obra',   objeto:'Restauración ambiental de la Ciénaga de Zambrano, Bolívar', valor:11739 },
+          { num:'0-250-2-2025', tipo:'interventoria', objeto:'Interventoría a obras de restauración Ciénaga de Zambrano', valor:906 }
+        ]
+      },
+      {
+        name: 'Fortalecimiento Gestión Ambiental — Cuenca del Magdalena',
+        vence: null,
+        contracts: [
+          { num:'66 CPS', tipo:'cps',
+            objeto:'66 contratos de prestación de servicios — fortalecimiento de la gestión ambiental integral de la cuenca del Magdalena',
+            valor:5425 },
+          { num:'0-272-2026', tipo:'lab',
+            objeto:'Contrato de laboratorio — análisis y caracterización para gestión ambiental, cuenca del Magdalena',
+            valor:215 },
+          { num:'0-277-2026', tipo:'veh',
+            objeto:'Contrato de vehículos — transporte para operaciones de campo, gestión ambiental cuenca del Magdalena',
+            valor:332 },
+          { num:'Bolsa viáticos', tipo:'viat',
+            objeto:'Viáticos — gastos de desplazamiento para actividades de campo, gestión ambiental cuenca del Magdalena',
+            valor:476 },
+          { num:'—', tipo:'contrap',
+            objeto:'Contrapartida Cormagdalena en especie: equipos, embarcaciones y consumibles (levantamientos Obj. 2) + funcionarios asignados para supervisión del proyecto',
+            valor:1462 },
+          { num:'—', tipo:'pendiente',
+            objeto:'Saldo sin comprometer — Contrato de Apoyo Logístico y Audiovisual (pendiente de contratación)',
+            valor:123 }
+        ]
+      }
+    ]
+  }
+];
+
+/* ════════════════════════════════════════════
+   ESTADO POR DEFECTO (Comité No. 12)
+════════════════════════════════════════════ */
+const DEFAULT_STATE = {
+  chapters: [
+    /* 0 — Navegación — Comité No. 13 (28/sep/2026) */
+    { corte: '2026-09-28', projects: [
+      { status:'warn',  terminado:false, nota:'Avance físico (87,91%) adelantado al financiero (81,65%) — Última factura $12,95 M (ago/2026) radicada el 01/oct/2026, pendiente de pago',
+        contracts:[
+          { fin:81.65, fis:87.91, v2026:{ fin:56,    fis:58    } },
+          { fin:80.19, fis:80.19, v2026:{ fin:43.14, fis:54.50 } }
+        ]},
+      { status:'warn',  terminado:false, nota:'Avance físico (90,64%) adelantado al financiero (85,87%) — monitoreo activo',
+        contracts:[
+          { fin:85.87, fis:90.64, v2026:{ fin:60.10, fis:73.54 } },
+          { fin:80.70, fis:90.64, v2026:{ fin:43.76, fis:73.54 } }
+        ]},
+      { status:'ok',    terminado:false, nota:'',
+        contracts:[
+          { fin:57.27, fis:57.27 }
+        ]}
+    ]},
+    /* 1 — Medio Ambiente — Comité No. 13 (28/sep/2026) */
+    { corte: '2026-09-28', projects: [
+      { status:'warn', terminado:false, nota:'Avance físico 30,51% (obra) y 36,24% (interventoría) con corte sep/2026 — sin pagos realizados aún',
+        contracts:[
+          { fin:0, fis:30.51 },
+          { fin:0, fis:36.24 }
+        ]},
+      { status:'warn', terminado:false, nota:'Avance físico 11,49% (obra) y 28,57% (interventoría) — actividades en curso',
+        contracts:[
+          { fin:0, fis:11.49 },
+          { fin:0, fis:28.57 }
+        ]},
+      { status:'ok',   terminado:false, nota:'Avance físico 20% con corte sep/2026, sin pagos realizados',
+        contracts:[
+          { fin:0, fis:20 }
+        ]},
+      { status:'ok',   terminado:false, nota:'Inicio 10/09/2026 — actividades preliminares en curso',
+        contracts:[
+          { fin:0, fis:0 },
+          { fin:0, fis:0 }
+        ]}
+    ]},
+    /* 2 — Tierras — Comité No. 13 (28/sep/2026) */
+    { corte: '2026-09-28', projects: [
+      { status:'warn', terminado:false, nota:'Avance financiero 51,78% (obra) — Acta No. 4 en proceso de radicación; brecha fin/fís requiere seguimiento',
+        contracts:[
+          { fin:51.78, fis:75.00 },
+          { fin:16.50, fis:65.90 }
+        ]}
+    ]},
+    /* 3 — SGR — Comité No. 13 (28/sep/2026) */
+    { corte: '2026-09-28', projects: [
+      { status:'warn',  terminado:false, nota:'Avance físico 80,81% — seguimiento a pagos pendientes de legalización',
+        contracts:[
+          { fin:61.80, fis:80.81 },
+          { fin:66.36, fis:80.81 }
+        ]},
+      { status:'ok',    terminado:true,  nota:'',
+        contracts:[
+          { fin:100,   fis:100   },
+          { fin:95,    fis:100   }
+        ]},
+      { status:'warn',  terminado:false, nota:'Avance financiero 90% — desfase respecto al físico (99,51%) en proceso de normalización',
+        contracts:[
+          { fin:90,    fis:99.51 },
+          { fin:90,    fis:99.51 }
+        ]},
+      { status:'warn',  terminado:true,  nota:'Avance físico 100% (obra e interventoría) — trámites finales de liquidación en curso',
+        contracts:[
+          { fin:90.21, fis:100   },
+          { fin:90,    fis:100   }
+        ]},
+      { status:'warn',  terminado:false, nota:'Avance físico 55,11% en los 66 CPS — verificar certificaciones pendientes; laboratorio 0-272-2026 terminado al 100%',
+        contracts:[
+          { fin:36.30, fis:55.11 },  /* 66 CPS — agregado */
+          { fin:100,   fis:100   },  /* 0-272-2026 Laboratorio — terminado */
+          { fin:0,     fis:0     },  /* 0-277-2026 Vehículos — en ejecución */
+          { fin:0,     fis:0     },  /* Viáticos */
+          { fin:0,     fis:0     },  /* Contrapartida en especie — informativo */
+          { fin:0,     fis:0     }   /* Saldo sin comprometer — informativo */
+        ]}
+    ]}
+  ]
+};
+
+/* ════════════════════════════════════════════
+   GESTIÓN DE ESTADO
+   Compartido: base de datos del panel (todos ven lo mismo)
+   Respaldo: localStorage (solo este navegador)
+════════════════════════════════════════════ */
+const STORAGE_KEY = 'sdsn-dashboard-v1';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+
+function saveState(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function clearState() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
+
+/* Merge saved state onto base chapters */
+function buildChapters(state) {
+  return CHAPTERS_BASE.map((ch, ci) => ({
+    ...ch,
+    corte: state.chapters[ci]?.corte || '2026-08-31',
+    projects: ch.projects.map((p, pi) => {
+      const ps = state.chapters[ci]?.projects[pi] || {};
+      return {
+        ...p,
+        status:    ps.status    ?? 'ok',
+        terminado: ps.terminado ?? false,
+        nota:      ps.nota      ?? '',
+        contracts: p.contracts.map((c, ki) => {
+          const cs = ps.contracts?.[ki] || {};
+          return {
+            ...c,
+            fin: cs.fin ?? 0,
+            fis: cs.fis ?? 0,
+            v2026: c.hasV26
+              ? { valor: c.valorV26, fin: cs.v2026?.fin ?? 0, fis: cs.v2026?.fis ?? 0 }
+              : null,
+            /* Campos de seguimiento de facturación */
+            ultFacIni:  cs.ultFacIni  || '',
+            ultFacFin:  cs.ultFacFin  || '',
+            radicado:   cs.radicado   || '',
+            ultPagoIni: cs.ultPagoIni || '',
+            ultPagoFin: cs.ultPagoFin || ''
+          };
+        })
+      };
+    })
+  }));
+}
+
+/* ════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════ */
+function fmtCOP(m) { return '$ ' + Math.round(m).toLocaleString('es-CO') + ' M'; }
+function fmtPct(p) { return p.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:2})+'%'; }
+function fmtDate(s) { if(!s) return null; return new Date(s+'T00:00:00').toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'}); }
+function daysLeft(s, today) { if(!s) return null; return Math.ceil((new Date(s+'T00:00:00')-today)/86400000); }
+function daysHtml(dl) {
+  if (dl===null) return '';
+  if (dl<0)   return `<span class="dc-alert">VENCIDO</span>`;
+  if (dl<90)  return `<span class="dc-alert">${dl} días restantes</span>`;
+  if (dl<180) return `<span class="dc-warn">${dl} días restantes</span>`;
+  return `<span class="dc-ok">${dl} días restantes</span>`;
+}
+const tipoLabel = { obra:'Obra', interventoria:'Interventoría', convenio:'Convenio', oc:'Orden de Compra', cps:'Prestación de Servicios', lab:'Laboratorio', veh:'Vehículos', viat:'Viáticos', contrap:'Contrapartida en especie', pendiente:'Sin contratar' };
+const tipoCls   = { obra:'tipo-obra', interventoria:'tipo-interventoria', convenio:'tipo-convenio', oc:'tipo-oc', cps:'tipo-cps', lab:'tipo-lab', veh:'tipo-veh', viat:'tipo-viat', contrap:'tipo-contrap', pendiente:'tipo-contrap' };
+const semCls    = { ok:'ok', warn:'warn', alert:'alt' };
+const cardCls   = { ok:'sok', warn:'swarn', alert:'salt' };
+
+/* ════════════════════════════════════════════
+   RENDER — DASHBOARD
+════════════════════════════════════════════ */
+function renderContract(c) {
+  /* Contrapartida en especie / saldo sin comprometer — líneas informativas sin barras */
+  if (c.tipo === 'contrap' || c.tipo === 'pendiente') {
+    const cls = c.tipo === 'pendiente' ? 'ctr-contrap pendiente' : 'ctr-contrap';
+    return `<div class="${cls}">
+      <span class="tipo-badge tipo-contrap">${tipoLabel[c.tipo]}</span>
+      <span class="ctr-contrap-obj">${c.objeto}</span>
+      <span class="ctr-contrap-val">${fmtCOP(c.valor)}</span>
+    </div>`;
+  }
+  const pagado  = c.valor * c.fin / 100;
+  const hasV26  = !!c.v2026;
+  let v26Html = '';
+  if (hasV26) {
+    const v = c.v2026;
+    const pagado26 = v.valor * v.fin / 100;
+    v26Html = `<div class="vblock">
+      <div class="vblock-head"><span class="vblock-label">Vigencia 2026</span><span class="vblock-valor">${fmtCOP(v.valor)}</span></div>
+      <div class="cbars">
+        <div class="cbar-row">
+          <span class="cbar-label">Financiero</span>
+          <div class="btrack"><div class="bfill bf-fin" style="width:${Math.min(v.fin,100)}%"></div></div>
+          <span class="bpct">${fmtPct(v.fin)}</span>
+          <span class="cpagado">Pagado: ${fmtCOP(pagado26)}</span>
+        </div>
+        <div class="cbar-row">
+          <span class="cbar-label">Físico</span>
+          <div class="btrack"><div class="bfill bf-fis" style="width:${Math.min(v.fis,100)}%"></div></div>
+          <span class="bpct">${fmtPct(v.fis)}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+  return `<div class="contract-row">
+    <div class="ctr-meta">
+      <span class="ctr-num">${c.num}</span>
+      <span class="tipo-badge ${tipoCls[c.tipo]||'tipo-oc'}">${tipoLabel[c.tipo]||c.tipo}</span>
+      ${c.inicio ? `<span class="ctr-inicio">Inicio ${fmtDate(c.inicio)}</span>` : ''}
+      <span class="ctr-valor-inline">${fmtCOP(c.valor)}</span>
+    </div>
+    <div class="ctr-objeto">${c.objeto}</div>
+    <div class="cbars">
+      ${hasV26 ? '<div class="acum-label">Acumulado total</div>' : ''}
+      <div class="cbar-row">
+        <span class="cbar-label">Financiero</span>
+        <div class="btrack"><div class="bfill bf-fin" style="width:${Math.min(c.fin,100)}%"></div></div>
+        <span class="bpct">${fmtPct(c.fin)}</span>
+        <span class="cpagado">Pagado: ${fmtCOP(pagado)}</span>
+      </div>
+      <div class="cbar-row">
+        <span class="cbar-label">Físico</span>
+        <div class="btrack"><div class="bfill bf-fis" style="width:${Math.min(c.fis,100)}%"></div></div>
+        <span class="bpct">${fmtPct(c.fis)}</span>
+      </div>
+    </div>
+    ${v26Html}
+    ${(()=>{
+      const hasBilling = c.ultFacIni || c.radicado || c.ultPagoIni;
+      if (!hasBilling) return '';
+      const fmtRange = (ini, fin) => ini ? `${fmtDate(ini)}${fin ? ' → ' + fmtDate(fin) : ''}` : '—';
+      return `<div class="c-billing">
+        ${c.ultFacIni ? `<div class="cbill-row"><span class="cbill-q">Último período facturado:</span><span class="cbill-v">${fmtRange(c.ultFacIni, c.ultFacFin)}</span></div>` : ''}
+        ${c.radicado  ? `<div class="cbill-row"><span class="cbill-q">Radicado:</span><span class="cbill-v cbill-rad">${c.radicado}</span></div>` : ''}
+        ${c.ultPagoIni ? `<div class="cbill-row"><span class="cbill-q">Último período pagado:</span><span class="cbill-v cbill-paid">${fmtRange(c.ultPagoIni, c.ultPagoFin)}</span></div>` : ''}
+      </div>`;
+    })()}
+  </div>`;
+}
+
+function renderProject(p, today) {
+  /* Excluir contrapartida en especie y saldo sin comprometer de los cálculos de avance */
+  const billable    = p.contracts.filter(c=>c.tipo!=='contrap'&&c.tipo!=='pendiente');
+  const totalValor  = p.contracts.reduce((a,c)=>a+c.valor,0);         /* total incluye contrapartida */
+  const totalPagado = billable.reduce((a,c)=>a+c.valor*c.fin/100,0);  /* pagado solo sobre ejecutables */
+  const billVal     = billable.reduce((a,c)=>a+c.valor,0);
+  const wAvgFin     = billVal ? billable.reduce((a,c)=>a+c.valor*c.fin/100,0)/billVal*100 : 0;
+  const wAvgFis     = billVal ? billable.reduce((a,c)=>a+c.valor*c.fis/100,0)/billVal*100 : 0;
+  const dl          = p.vence ? daysLeft(p.vence, today) : null;
+  const isAlert     = p.status === 'alert';
+  const nameHtml    = p.terminado ? `${p.name} <span class="terminado-badge">Terminado</span>` : p.name;
+  const notaHtml    = p.nota ? `<div class="pnota${isAlert?' alert-nota':''}">${p.nota}</div>` : '';
+  return `<div class="pcard ${cardCls[p.status]||''}">
+    <div class="pcard-hdr">
+      <div class="psem ${semCls[p.status]||'ok'}"></div>
+      <div class="pinfo">
+        <div class="pname">${nameHtml}</div>
+        ${notaHtml}
+      </div>
+      <div class="pcard-kpis">
+        <div class="pkpi">
+          <span class="pkpi-label">Fin.</span>
+          <div class="pkpi-bar"><div class="pkpi-fill pf-fin" style="width:${Math.min(wAvgFin,100)}%"></div></div>
+          <span class="pkpi-pct fin-c">${fmtPct(wAvgFin)}</span>
+        </div>
+        <div class="pkpi">
+          <span class="pkpi-label">Fís.</span>
+          <div class="pkpi-bar"><div class="pkpi-fill pf-fis" style="width:${Math.min(wAvgFis,100)}%"></div></div>
+          <span class="pkpi-pct fis-c">${fmtPct(wAvgFis)}</span>
+        </div>
+      </div>
+      <div class="paside">
+        <div class="aside-bgt">${fmtCOP(totalValor)}</div>
+        ${p.vence ? `<div class="aside-vence">Vence ${fmtDate(p.vence)}</div>` : ''}
+        <div class="aside-days">${daysHtml(dl)}</div>
+        <div class="aside-pagado">${fmtCOP(totalPagado)} pagado</div>
+      </div>
+      <div class="pcard-chev">
+        <svg viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+      </div>
+    </div>
+    <div class="pcard-body">
+      <div class="contracts-list">${p.contracts.map(renderContract).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function renderDashboard(chapters) {
+  const tabsEl   = document.getElementById('tabs');
+  const panelsEl = document.getElementById('panels');
+  tabsEl.innerHTML   = '';
+  panelsEl.innerHTML = '';
+
+  chapters.forEach((ch, i) => {
+    const allContracts = ch.projects.flatMap(p=>p.contracts);
+    /* Excluir contrapartidas en especie y saldos sin comprometer del resumen */
+    const billables    = allContracts.filter(c=>c.tipo!=='contrap'&&c.tipo!=='pendiente');
+    const useV26 = !!ch.summaryUseV26;
+    /* Para Navegación el resumen usa cifras de vigencia 2026;
+       contratos sin v2026 (ej. OC combustibles) usan sus valores totales */
+    const eValor = c => (useV26 && c.v2026) ? c.v2026.valor : c.valor;
+    const eFin   = c => (useV26 && c.v2026) ? c.v2026.fin   : c.fin;
+    const eFis   = c => (useV26 && c.v2026) ? c.v2026.fis   : c.fis;
+    const totalValor   = allContracts.reduce((a,c)=>a+eValor(c),0);   /* total incluye contrapartida */
+    const totalPagado  = billables.reduce((a,c)=>a+eValor(c)*eFin(c)/100,0);
+    const billVal      = billables.reduce((a,c)=>a+eValor(c),0);
+    const wAvgFin = billVal ? billables.reduce((a,c)=>a+eValor(c)*eFin(c)/100,0)/billVal*100 : 0;
+    const wAvgFis = billVal ? billables.reduce((a,c)=>a+eValor(c)*eFis(c)/100,0)/billVal*100 : 0;
+
+    /* Fecha de corte propia del capítulo */
+    const chToday = new Date((ch.corte || '2026-08-31') + 'T00:00:00');
+    const chDs = chToday.toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'});
+
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn'+(i===activeTab?' active':'');
+    btn.dataset.tab = i;
+    btn.innerHTML = `<span class="tab-short">${ch.short}</span><span class="tab-count">${allContracts.length} contrato${allContracts.length!==1?'s':''}</span>`;
+    tabsEl.appendChild(btn);
+
+    const panel = document.createElement('div');
+    panel.className = 'chapter-panel'+(i===activeTab?' active':'');
+    panel.dataset.panel = i;
+    panel.innerHTML = `
+      <div class="ch-title-row">
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-corte-badge">Corte: ${chDs}</div>
+      </div>
+      <div class="sum-row">
+        <div class="sum-tile"><div class="sum-label">${useV26?'Valor vigencia 2026':'Valor comprometido'}</div><div class="sum-val">${fmtCOP(totalValor)}</div><div class="sum-sub">${ch.projects.length} proyecto${ch.projects.length!==1?'s':''} · ${allContracts.length} contratos</div></div>
+        <div class="sum-tile"><div class="sum-label">${useV26?'Ejecutado V2026':'Total pagado'}</div><div class="sum-val">${fmtCOP(totalPagado)}</div><div class="sum-sub">${useV26?'de la apropiación 2026':'del valor comprometido'}</div></div>
+        <div class="sum-tile st-accent"><div class="sum-label">Avance financiero</div><div class="sum-val ca">${fmtPct(wAvgFin)}</div><div class="sum-sub">${useV26?'prom. pond. V2026':'prom. ponderado'}</div></div>
+        <div class="sum-tile st-amber"><div class="sum-label">Avance físico</div><div class="sum-val cs">${fmtPct(wAvgFis)}</div><div class="sum-sub">${useV26?'prom. pond. V2026':'prom. ponderado'}</div></div>
+      </div>
+      <div class="plist">${ch.projects.map(p=>renderProject(p, chToday)).join('')}</div>`;
+    panelsEl.appendChild(panel);
+    /* Auto-abrir el primer proyecto de cada panel */
+    const firstCard = panel.querySelector('.pcard');
+    if (firstCard) firstCard.classList.add('open');
+  });
+
+}
+
+/* ════════════════════════════════════════════
+   EDITOR
+════════════════════════════════════════════ */
+function buildEditor(state, chapters) {
+  /* Track status selections in memory while modal is open */
+  const statusMap = {};
+  chapters.forEach((ch,ci) => ch.projects.forEach((p,pi) => { statusMap[`${ci}-${pi}`] = p.status; }));
+
+  function spBtns(ci, pi, current) {
+    return ['ok','warn','alert'].map(s =>
+      `<button type="button" class="sp-btn sp-${s==='alert'?'alt':s}${statusMap[`${ci}-${pi}`]===s?' sel':''}" data-ci="${ci}" data-pi="${pi}" data-sv="${s}">${s==='ok'?'Normal':s==='warn'?'Atención':'Alerta'}</button>`
+    ).join('');
+  }
+
+  function contractForm(ci, pi, ki, c, csData) {
+    /* Contrapartida en especie / saldo sin comprometer — solo informativas, sin campos de avance */
+    if (c.tipo === 'contrap' || c.tipo === 'pendiente') {
+      const subLabel = c.tipo === 'pendiente'
+        ? 'Saldo presupuestal sin contratar — no requiere seguimiento de avance'
+        : 'Aporte institucional en especie — sin avance financiero/físico';
+      const borderStyle = c.tipo === 'pendiente' ? 'border-left:3px solid var(--warn);' : '';
+      return `<div class="edit-ctr" style="opacity:0.75;${borderStyle}">
+        <div class="edit-ctr-head">
+          <span class="tipo-badge tipo-contrap">${tipoLabel[c.tipo]}</span>
+          <span style="font-size:11px;color:var(--text-3);margin-left:6px">${c.objeto}</span>
+          <span style="font-size:10.5px;color:var(--text-3);margin-left:auto">${fmtCOP(c.valor)}</span>
+        </div>
+        <div style="font-size:10.5px;color:var(--text-3);padding:4px 0 2px">${subLabel}</div>
+      </div>`;
+    }
+    const v26 = c.hasV26 ? `
+      <div class="pct-block" style="margin-top:6px;">
+        <div class="pct-block-label lv26">Vigencia 2026 — ${fmtCOP(c.valorV26||0)}</div>
+        <div class="pct-row">
+          <span class="pct-row-label">Fin. V2026</span>
+          <div class="pct-input-wrap">
+            <input type="number" class="pct-input" id="v26fin-${ci}-${pi}-${ki}" min="0" max="100" step="0.01" value="${(csData.v2026?.fin??0).toFixed(2)}">
+            <span class="pct-sym">%</span>
+          </div>
+          <div class="pct-divider"></div>
+          <span class="pct-row-label">Fís. V2026</span>
+          <div class="pct-input-wrap">
+            <input type="number" class="pct-input" id="v26fis-${ci}-${pi}-${ki}" min="0" max="100" step="0.01" value="${(csData.v2026?.fis??0).toFixed(2)}">
+            <span class="pct-sym">%</span>
+          </div>
+        </div>
+      </div>` : '';
+    return `<div class="edit-ctr">
+      <div class="edit-ctr-head">
+        <span class="edit-ctr-num">${c.num}</span>
+        <span class="tipo-badge ${tipoCls[c.tipo]||'tipo-oc'}">${tipoLabel[c.tipo]||c.tipo}</span>
+        <span style="font-size:10.5px;color:var(--text-3);margin-left:auto">${fmtCOP(c.valor)}</span>
+      </div>
+      <div class="pct-block">
+        <div class="pct-block-label">Avance acumulado total</div>
+        <div class="pct-row">
+          <span class="pct-row-label">Financiero</span>
+          <div class="pct-input-wrap">
+            <input type="number" class="pct-input" id="fin-${ci}-${pi}-${ki}" min="0" max="100" step="0.01" value="${(csData.fin??0).toFixed(2)}">
+            <span class="pct-sym">%</span>
+          </div>
+          <div class="pct-divider"></div>
+          <span class="pct-row-label">Físico</span>
+          <div class="pct-input-wrap">
+            <input type="number" class="pct-input" id="fis-${ci}-${pi}-${ki}" min="0" max="100" step="0.01" value="${(csData.fis??0).toFixed(2)}">
+            <span class="pct-sym">%</span>
+          </div>
+        </div>
+      </div>
+      ${v26}
+      <div class="bill-block">
+        <div class="bill-block-label">Seguimiento de facturación</div>
+        <div>
+          <label class="bill-q-label">¿Cuál fue el último período facturado?</label>
+          <div class="bill-daterange">
+            <input type="date" class="bill-date" id="ufac-ini-${ci}-${pi}-${ki}" value="${csData.ultFacIni||''}" title="Inicio del período facturado">
+            <span class="bill-sep">→</span>
+            <input type="date" class="bill-date" id="ufac-fin-${ci}-${pi}-${ki}" value="${csData.ultFacFin||''}" title="Fin del período facturado">
+          </div>
+        </div>
+        <div>
+          <label class="bill-q-label">¿Cuál es el número de radicado de esta última cuenta facturada?</label>
+          <input type="text" class="bill-input" id="radicado-${ci}-${pi}-${ki}" value="${(csData.radicado||'').replace(/"/g,'&quot;')}" placeholder="Ej. 2026-RAD-004521">
+        </div>
+        <div>
+          <label class="bill-q-label">¿Cuál fue el último período de cobro ya pagado por la entidad?</label>
+          <div class="bill-daterange">
+            <input type="date" class="bill-date" id="upago-ini-${ci}-${pi}-${ki}" value="${csData.ultPagoIni||''}" title="Inicio del período pagado">
+            <span class="bill-sep">→</span>
+            <input type="date" class="bill-date" id="upago-fin-${ci}-${pi}-${ki}" value="${csData.ultPagoFin||''}" title="Fin del período pagado">
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function projectForm(ci, pi, p, psData) {
+    const cForms = p.contracts.map((c,ki)=>contractForm(ci,pi,ki,c,psData.contracts[ki]||{})).join('');
+    return `<div class="edit-project">
+      <div class="edit-project-name">${p.name}</div>
+      <div class="edit-meta-row">
+        <span class="meta-label">Estado</span>
+        <div class="status-pick" id="sp-${ci}-${pi}">${spBtns(ci,pi,psData.status)}</div>
+        <label class="term-label" style="margin-left:auto">
+          <input type="checkbox" id="term-${ci}-${pi}"${psData.terminado?' checked':''}> Terminado
+        </label>
+      </div>
+      <textarea class="nota-input" id="nota-${ci}-${pi}" rows="2" placeholder="Nota de seguimiento (opcional)">${(psData.nota||'').replace(/</g,'&lt;')}</textarea>
+      ${cForms}
+    </div>`;
+  }
+
+  const chapterContent = chapters.map((ch,ci) => {
+    const psState   = state.chapters[ci]?.projects || [];
+    const chCorte   = state.chapters[ci]?.corte || '2026-08-31';
+    return `<div class="edit-chapter${ci===0?' active':''}" data-epanel="${ci}">
+      <div class="corte-row">
+        <span class="corte-label">Fecha de corte — ${ch.short}</span>
+        <input type="date" class="corte-input" id="form-corte-${ci}" value="${chCorte}">
+      </div>
+      ${ch.projects.map((p,pi)=>projectForm(ci,pi,p,psState[pi]||{contracts:[]})).join('')}
+    </div>`;
+  }).join('');
+
+  const editTabBtns = chapters.map((ch,i)=>`<button class="edit-tab${i===0?' active':''}" data-etab="${i}">${ch.short}</button>`).join('');
+
+  const html = `<div class="edit-overlay" id="edit-overlay">
+    <div class="edit-modal">
+      <div class="edit-header">
+        <span class="edit-title">✏ Actualizar datos del dashboard</span>
+        <button class="edit-close-btn" id="edit-close">✕</button>
+      </div>
+      <div class="edit-body">
+        <div class="edit-tabs" id="edit-tabs">${editTabBtns}</div>
+        ${chapterContent}
+      </div>
+      <div class="edit-footer">
+        <div class="edit-footer-left" id="edit-footer-msg">${sharedRef ? 'Al guardar, todos verán estos datos' : 'Los cambios se guardan solo en este navegador'}</div>
+        <div class="edit-footer-right">
+          <button class="btn-reset" id="btn-reset">Restablecer valores originales</button>
+          <button class="btn-cancel" id="btn-cancel">Cancelar</button>
+          <button class="btn-save" id="btn-save">Guardar y actualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('edit-root').innerHTML = html;
+
+  /* ── Inner tab switching ── */
+  document.getElementById('edit-tabs').addEventListener('click', e => {
+    const t = e.target.closest('.edit-tab');
+    if (!t) return;
+    const idx = t.dataset.etab;
+    document.querySelectorAll('.edit-tab').forEach(b=>b.classList.toggle('active',b.dataset.etab===idx));
+    document.querySelectorAll('.edit-chapter').forEach(p=>p.classList.toggle('active',p.dataset.epanel===idx));
+  });
+
+  /* ── Status picker ── */
+  document.getElementById('edit-root').addEventListener('click', e => {
+    const sp = e.target.closest('.sp-btn');
+    if (!sp) return;
+    const ci = sp.dataset.ci, pi = sp.dataset.pi, sv = sp.dataset.sv;
+    statusMap[`${ci}-${pi}`] = sv;
+    sp.closest('.status-pick').querySelectorAll('.sp-btn').forEach(b=>{
+      b.classList.remove('sel');
+      if (b.dataset.sv===sv) b.classList.add('sel');
+    });
+  });
+
+  /* ── Close / Cancel ── */
+  document.getElementById('edit-close').addEventListener('click', closeEditor);
+  document.getElementById('btn-cancel').addEventListener('click', closeEditor);
+  document.getElementById('edit-overlay').addEventListener('click', e => {
+    if (e.target===document.getElementById('edit-overlay')) closeEditor();
+  });
+
+  /* ── Reset (confirmación dentro de la página) ── */
+  const resetBtn = document.getElementById('btn-reset');
+  let resetArmed = false;
+  resetBtn.addEventListener('click', () => {
+    if (!resetArmed) {
+      resetArmed = true;
+      resetBtn.classList.add('confirm');
+      resetBtn.textContent = 'Clic de nuevo para restablecer al Comité No. 13';
+      setTimeout(() => { resetArmed = false; resetBtn.classList.remove('confirm'); resetBtn.textContent = 'Restablecer valores originales'; }, 5000);
+      return;
+    }
+    commitState(JSON.parse(JSON.stringify(DEFAULT_STATE)));
+  });
+
+  /* ── Save ── */
+  document.getElementById('btn-save').addEventListener('click', () => {
+    const newState = {
+      chapters: chapters.map((ch,ci) => ({
+        corte: document.getElementById(`form-corte-${ci}`)?.value || ch.corte || '2026-08-31',
+        projects: ch.projects.map((p,pi) => ({
+          status:    statusMap[`${ci}-${pi}`] || 'ok',
+          terminado: document.getElementById(`term-${ci}-${pi}`)?.checked || false,
+          nota:      document.getElementById(`nota-${ci}-${pi}`)?.value || '',
+          contracts: p.contracts.map((c,ki) => ({
+            fin: parseFloat(document.getElementById(`fin-${ci}-${pi}-${ki}`)?.value) || 0,
+            fis: parseFloat(document.getElementById(`fis-${ci}-${pi}-${ki}`)?.value) || 0,
+            v2026: c.hasV26 ? {
+              fin: parseFloat(document.getElementById(`v26fin-${ci}-${pi}-${ki}`)?.value) || 0,
+              fis: parseFloat(document.getElementById(`v26fis-${ci}-${pi}-${ki}`)?.value) || 0
+            } : null,
+            ultFacIni:  document.getElementById(`ufac-ini-${ci}-${pi}-${ki}`)?.value  || '',
+            ultFacFin:  document.getElementById(`ufac-fin-${ci}-${pi}-${ki}`)?.value  || '',
+            radicado:   document.getElementById(`radicado-${ci}-${pi}-${ki}`)?.value  || '',
+            ultPagoIni: document.getElementById(`upago-ini-${ci}-${pi}-${ki}`)?.value || '',
+            ultPagoFin: document.getElementById(`upago-fin-${ci}-${pi}-${ki}`)?.value || ''
+          }))
+        }))
+      }))
+    };
+    commitState(newState);
+  });
+}
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+let currentState = loadState() || DEFAULT_STATE;
+let chapters = [];
+let activeTab = 0;
+let editorBuilt = false;
+let sharedRef = null;   /* documento compartido en la base de datos */
+let myId = '';
+let pendingState = null;
+
+function setSync(text, cls) {
+  const el = document.getElementById('hdr-sync');
+  el.textContent = text;
+  el.className = 'hdr-sync' + (cls ? ' ' + cls : '');
+}
+function fmtStamp(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleString('es-CO', { day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'2-digit' });
+}
+
+function applyState(state) {
+  currentState = state;
+  chapters = buildChapters(state);
+  renderDashboard(chapters);
+  const maxCorte = chapters.reduce((max, ch) => ch.corte > max ? ch.corte : max, '2000-01-01');
+  const ds = new Date(maxCorte + 'T00:00:00').toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('hdr-date').innerHTML = `Última actualización<br><strong>${ds}</strong>`;
+  document.getElementById('footer-ts').textContent = `Datos: Comité Directivo No. 12 · Última actualización ${ds}`;
+  editorBuilt = false;
+  document.getElementById('edit-root').innerHTML = '';
+}
+
+function closeEditor() {
+  const ov = document.getElementById('edit-overlay');
+  if (ov) ov.classList.remove('open');
+  if (pendingState) { const s = pendingState; pendingState = null; applyState(s); }
+}
+
+async function commitState(newState) {
+  const saveBtn = document.getElementById('btn-save');
+  const msg = document.getElementById('edit-footer-msg');
+  if (sharedRef) {
+    if (saveBtn) saveBtn.disabled = true;
+    if (msg) { msg.textContent = 'Guardando…'; msg.className = 'edit-footer-left'; }
+    try {
+      await sharedRef.set({ json: JSON.stringify(newState), updatedAt: new Date().toISOString(), updatedBy: myId || '' });
+    } catch (e) {
+      if (saveBtn) saveBtn.disabled = false;
+      if (msg) {
+        msg.className = 'edit-footer-left edit-err';
+        msg.textContent = (e && e.code === 'invalid_argument')
+          ? 'No tienes permiso para guardar. Pide acceso de edición al dueño del panel.'
+          : 'No se pudo guardar. Revisa la conexión e inténtalo de nuevo.';
+      }
+      return;
+    }
+    saveState(newState);
+    pendingState = null;
+    closeEditor();
+    applyState(newState);
+    setSync('Guardado para todos · ' + fmtStamp(new Date().toISOString()), 'ok');
+  } else {
+    saveState(newState);
+    pendingState = null;
+    closeEditor();
+    applyState(newState);
+  }
+}
+
+async function initShared() {
+  if (!window.claude || typeof window.claude.use !== 'function') {
+    setSync('Modo local: los cambios se guardan solo en este navegador');
+    return;
+  }
+  let db = null;
+  try { db = await window.claude.use('db'); } catch (e) {}
+  if (!db) { setSync('Modo local: los cambios se guardan solo en este navegador'); return; }
+  try {
+    const user = await window.claude.use('user');
+    if (user) {
+      try { myId = (await user.id()) || ''; } catch (e) {}
+      let cw = null;
+      try { cw = await user.can('data.write'); } catch (e) {}
+      if (cw === false) document.getElementById('edit-btn').hidden = true;
+    }
+  } catch (e) {}
+  sharedRef = db.doc('panel/estado');
+  setSync('Conectando con los datos compartidos…');
+  sharedRef.onSnapshot(snap => {
+    let next = DEFAULT_STATE, stamp = '';
+    if (snap.exists) {
+      const d = snap.data() || {};
+      try { next = JSON.parse(d.json); } catch (e) { return; }
+      stamp = d.updatedAt;
+      saveState(next);
+    }
+    if (JSON.stringify(next) !== JSON.stringify(currentState)) {
+      const ov = document.getElementById('edit-overlay');
+      if (ov && ov.classList.contains('open')) {
+        pendingState = next;
+        setSync('Alguien guardó cambios nuevos; se mostrarán al cerrar el editor');
+        return;
+      }
+      applyState(next);
+    }
+    setSync(stamp ? 'Datos compartidos · guardado ' + fmtStamp(stamp) : 'Datos compartidos · valores del Comité No. 13');
+  }, () => {
+    setSync('Sin conexión con los datos compartidos. Recarga la página.', 'err');
+  });
+}
+
+(function init() {
+  /* Listeners una sola vez */
+  document.getElementById('panels').addEventListener('click', e => {
+    const hdr = e.target.closest('.pcard-hdr');
+    if (hdr) hdr.closest('.pcard').classList.toggle('open');
+  });
+  document.getElementById('tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    activeTab = Number(btn.dataset.tab);
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', Number(b.dataset.tab)===activeTab));
+    document.querySelectorAll('.chapter-panel').forEach(p=>p.classList.toggle('active', Number(p.dataset.panel)===activeTab));
+  });
+  document.getElementById('edit-btn').addEventListener('click', () => {
+    if (!editorBuilt) { buildEditor(currentState, chapters); editorBuilt = true; }
+    document.getElementById('edit-overlay').classList.add('open');
+  });
+
+  applyState(currentState);
+  initShared();
+})();
+</script>
+</body>
+</html>
